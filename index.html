@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Tron Tools — Osaka Research</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.2/dist/TronWeb.js"></script>
+</head>
+<body>
+<header class="hdr">
+  <h1>Tron Tools</h1>
+  <p class="sub">Mainnet · read-only unless you paste a key · everything runs in your browser</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-tab="wallet">Wallet</button>
+  <button class="tab" data-tab="validate">Validate</button>
+  <button class="tab" data-tab="balance">Balance</button>
+  <button class="tab" data-tab="tx">Tx Lookup</button>
+  <button class="tab" data-tab="resources">Resources</button>
+</nav>
+
+<main>
+  <section id="wallet" class="panel active">
+    <h2>Generate Wallet</h2>
+    <p class="hint">Creates a brand-new TRX account in your browser. Nothing is sent anywhere. Save the private key — if you lose it, the funds are gone.</p>
+    <button id="genBtn" class="primary">Generate new wallet</button>
+    <div id="walletOut" class="out hidden">
+      <label>Address (Base58)</label>
+      <div class="row"><code id="wAddr"></code><button class="copy" data-target="wAddr">Copy</button></div>
+      <label>Address (Hex)</label>
+      <div class="row"><code id="wHex"></code><button class="copy" data-target="wHex">Copy</button></div>
+      <label>Private key</label>
+      <div class="row"><code id="wPriv" class="secret"></code><button class="copy" data-target="wPriv">Copy</button></div>
+      <label>Public key</label>
+      <div class="row"><code id="wPub"></code><button class="copy" data-target="wPub">Copy</button></div>
+      <p class="warn">Store the private key in an offline password manager. Anyone with this key controls the funds.</p>
+    </div>
+  </section>
+
+  <section id="validate" class="panel">
+    <h2>Validate Address</h2>
+    <p class="hint">Checks if a string is a syntactically valid Tron address (Base58 T... or 41-hex).</p>
+    <input id="vAddr" type="text" placeholder="TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <button id="vBtn" class="primary">Validate</button>
+    <div id="vOut" class="out"></div>
+  </section>
+
+  <section id="balance" class="panel">
+    <h2>Check Balance</h2>
+    <p class="hint">Live TRX + USDT (TRC-20) balance for any address, via TronGrid mainnet.</p>
+    <input id="bAddr" type="text" placeholder="TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <button id="bBtn" class="primary">Fetch balance</button>
+    <div id="bOut" class="out"></div>
+  </section>
+
+  <section id="tx" class="panel">
+    <h2>Transaction Lookup</h2>
+    <p class="hint">Paste a 64-char tx hash to see confirmation, block, fee, and transfer details.</p>
+    <input id="tHash" type="text" placeholder="transaction hash" autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <button id="tBtn" class="primary">Look up</button>
+    <div id="tOut" class="out"></div>
+  </section>
+
+  <section id="resources" class="panel">
+    <h2>Account Resources</h2>
+    <p class="hint">Energy, bandwidth, frozen TRX, and votes for an address.</p>
+    <input id="rAddr" type="text" placeholder="TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <button id="rBtn" class="primary">Fetch resources</button>
+    <div id="rOut" class="out"></div>
+  </section>
+</main>
+
+<footer class="ftr">
+  <span>Osaka Research · <a href="https://github.com/Osaka-Research/tron-tools" target="_blank" rel="noopener">source</a></span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
