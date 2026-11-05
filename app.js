@@ -212,4 +212,201 @@
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
+
+  // ---------- TRX/USD converter ----------
+  let trxPrice = null;
+  async function refreshPrice() {
+    const out = $("cPrice");
+    out.innerHTML = '<p class="hint">Fetching…</p>';
+    try {
+      const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd");
+      const j = await res.json();
+      trxPrice = j.tron.usd;
+      out.innerHTML = `<p class="ok">1 TRX = $${trxPrice} USD</p>`;
+    } catch (err) {
+      out.innerHTML = `<p class="err">${escapeHtml(err.message || String(err))}</p>`;
+    }
+  }
+  $("cRefreshBtn").addEventListener("click", refreshPrice);
+  $("cTrx").addEventListener("input", () => {
+    if (trxPrice == null) return;
+    $("cUsd").value = (parseFloat($("cTrx").value || 0) * trxPrice).toFixed(6);
+  });
+  $("cUsd").addEventListener("input", () => {
+    if (trxPrice == null) return;
+    $("cTrx").value = (parseFloat($("cUsd").value || 0) / trxPrice).toFixed(6);
+  });
+
+  // ---------- Multi-address balance checker ----------
+  $("mBtn").addEventListener("click", async () => {
+    const lines = $("mAddrs").value.split("\n").map((s) => s.trim()).filter(Boolean);
+    const out = $("mOut");
+    if (!lines.length) {
+      out.innerHTML = '<p class="err">Paste at least one address.</p>';
+      return;
+    }
+    out.innerHTML = '<p class="hint">Fetching…</p>';
+    try {
+      const rows = await Promise.all(
+        lines.map(async (addr) => {
+          if (!TronWeb.isAddress(addr)) return { addr, error: "invalid address" };
+          try {
+            const [trxSun, usdtRaw] = await Promise.all([
+              tronWeb.trx.getBalance(addr),
+              fetchUsdtBalance(addr),
+            ]);
+            return {
+              addr,
+              trx: (Number(trxSun) / SUN_PER_TRX).toLocaleString("en-US", { maximumFractionDigits: 6 }),
+              usdt: (Number(usdtRaw) / 1_000_000).toLocaleString("en-US", { maximumFractionDigits: 6 }),
+            };
+          } catch (e) {
+            return { addr, error: e.message || String(e) };
+          }
+        })
+      );
+      out.innerHTML = `<table class="tbl"><thead><tr><th>Address</th><th>TRX</th><th>USDT</th></tr></thead><tbody>${rows
+        .map((r) =>
+          r.error
+            ? `<tr><td>${escapeHtml(r.addr)}</td><td colspan="2" class="err">${escapeHtml(r.error)}</td></tr>`
+            : `<tr><td>${escapeHtml(r.addr)}</td><td>${r.trx}</td><td>${r.usdt}</td></tr>`
+        )
+        .join("")}</tbody></table>`;
+    } catch (err) {
+      out.innerHTML = `<p class="err">${escapeHtml(err.message || String(err))}</p>`;
+    }
+  });
+
+  // ---------- Generic TRC-20 token info ----------
+  async function triggerConstant(contract, selector, owner) {
+    const ownerAddr = owner || contract;
+    const res = await fetch(`${TRONGRID}/wallet/triggerconstantcontract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        owner_address: TronWeb.address.toHex(ownerAddr),
+        contract_address: TronWeb.address.toHex(contract),
+        function_selector: selector,
+        parameter: "",
+        visible: false,
+      }),
+    });
+    const j = await res.json();
+    if (j.result && j.result.result === false) {
+      throw new Error(j.result.message ? hexToUtf8Safe(j.result.message) : "call failed");
+    }
+    return j.constant_result && j.constant_result[0];
+  }
+  function hexToUtf8Safe(hex) {
+    try {
+      const bytes = new Uint8Array(hex.match(/.{1,2}/g).map((b) => parseInt(b, 16)));
+      return new TextDecoder("utf-8").decode(bytes);
+    } catch {
+      return hex;
+    }
+  }
+  function decodeAbiString(hex) {
+    if (!hex) return "";
+    const len = parseInt(hex.slice(64, 128), 16) || 0;
+    const strHex = hex.slice(128, 128 + len * 2);
+    let out = "";
+    for (let i = 0; i < strHex.length; i += 2) out += String.fromCharCode(parseInt(strHex.substr(i, 2), 16));
+    return out;
+  }
+  async function balanceOf(contract, owner) {
+    const ownerHex = TronWeb.address.toHex(owner).replace(/^41/, "").padStart(64, "0");
+    const res = await fetch(`${TRONGRID}/wallet/triggerconstantcontract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        owner_address: TronWeb.address.toHex(owner),
+        contract_address: TronWeb.address.toHex(contract),
+        function_selector: "balanceOf(address)",
+        parameter: ownerHex,
+        visible: false,
+      }),
+    });
+    const j = await res.json();
+    if (!j.constant_result || !j.constant_result[0]) return 0n;
+    return BigInt("0x" + j.constant_result[0]);
+  }
+  $("trcBtn").addEventListener("click", async () => {
+    const contract = $("trcContract").value.trim();
+    const owner = $("trcOwner").value.trim();
+    const out = $("trcOut");
+    if (!TronWeb.isAddress(contract)) {
+      out.innerHTML = '<p class="err">Enter a valid contract address.</p>';
+      return;
+    }
+    out.innerHTML = '<p class="hint">Fetching…</p>';
+    try {
+      const [nameHex, symbolHex, decHex] = await Promise.all([
+        triggerConstant(contract, "name()"),
+        triggerConstant(contract, "symbol()"),
+        triggerConstant(contract, "decimals()"),
+      ]);
+      const name = decodeAbiString(nameHex);
+      const symbol = decodeAbiString(symbolHex);
+      const decimals = parseInt(decHex, 16) || 0;
+      let balRow = "";
+      if (owner) {
+        if (!TronWeb.isAddress(owner)) {
+          balRow = `<dt>Balance</dt><dd class="err">invalid owner address</dd>`;
+        } else {
+          const raw = await balanceOf(contract, owner);
+          const bal = Number(raw) / Math.pow(10, decimals);
+          balRow = `<dt>Balance</dt><dd>${bal.toLocaleString("en-US", { maximumFractionDigits: decimals })}</dd>`;
+        }
+      }
+      out.innerHTML = `<dl class="kv">
+        <dt>Name</dt><dd>${escapeHtml(name)}</dd>
+        <dt>Symbol</dt><dd>${escapeHtml(symbol)}</dd>
+        <dt>Decimals</dt><dd>${decimals}</dd>
+        ${balRow}
+      </dl>`;
+    } catch (err) {
+      out.innerHTML = `<p class="err">${escapeHtml(err.message || String(err))}</p>`;
+    }
+  });
+
+  // ---------- Network stats ----------
+  $("nBtn").addEventListener("click", async () => {
+    const out = $("nOut");
+    out.innerHTML = '<p class="hint">Fetching…</p>';
+    try {
+      const [block, witnesses] = await Promise.all([
+        fetch(`${TRONGRID}/wallet/getnowblock`, { method: "POST" }).then((r) => r.json()),
+        fetch(`${TRONGRID}/wallet/listwitnesses`, { method: "POST" }).then((r) => r.json()),
+      ]);
+      const blockNumber = block.block_header.raw_data.number;
+      const timestamp = new Date(block.block_header.raw_data.timestamp).toLocaleString();
+      const witnessCount = (witnesses.witnesses || []).length;
+      out.innerHTML = `<dl class="kv">
+        <dt>Block height</dt><dd>${blockNumber.toLocaleString("en-US")}</dd>
+        <dt>Block time</dt><dd>${escapeHtml(timestamp)}</dd>
+        <dt>Witnesses</dt><dd>${witnessCount}</dd>
+      </dl>`;
+    } catch (err) {
+      out.innerHTML = `<p class="err">${escapeHtml(err.message || String(err))}</p>`;
+    }
+  });
+
+  // ---------- QR address generator ----------
+  $("qBtn").addEventListener("click", async () => {
+    const addr = $("qAddr").value.trim();
+    const amt = $("qAmt").value.trim();
+    const out = $("qOut");
+    if (!TronWeb.isAddress(addr)) {
+      out.innerHTML = '<p class="err">Enter a valid Tron address.</p>';
+      return;
+    }
+    const uri = amt ? `tron:${addr}?amount=${encodeURIComponent(amt)}` : addr;
+    out.innerHTML = '<canvas id="qCanvas"></canvas><p class="hint"></p>';
+    try {
+      await QRCode.toCanvas($("qCanvas"), uri, { width: 220 });
+      out.querySelector("p.hint").textContent = uri;
+    } catch (err) {
+      out.innerHTML = `<p class="err">${escapeHtml(err.message || String(err))}</p>`;
+    }
+  });
 })();

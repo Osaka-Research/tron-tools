@@ -5,20 +5,20 @@ Each item becomes one new tool/tab or a scoped enhancement. Keep each item small
 ## Ideas
 
 - [ ] Address book — save/label/delete addresses in localStorage, use anywhere by picker
-- [ ] TRX ↔ USD converter using CoinGecko public API with manual refresh
-- [ ] Multi-address balance checker — paste N addresses, show TRX+USDT in a table
-- [ ] Generic TRC-20 balance — paste contract + address, show symbol, decimals, balance
+- [x] TRX ↔ USD converter using CoinGecko public API with manual refresh
+- [x] Multi-address balance checker — paste N addresses, show TRX+USDT in a table
+- [x] Generic TRC-20 balance — paste contract + address, show symbol, decimals, balance
 - [ ] Vanity address generator — pick a prefix/suffix, mine client-side with progress
 - [ ] Base58 ↔ Hex address converter standalone tab
 - [ ] Sign message (TIP-191) with a pasted private key, output signature
 - [ ] Verify message signature — address + message + signature → valid/invalid
-- [ ] Network stats tab — block height, TPS, witnesses count, totalTransactionCount
+- [x] Network stats tab — block height, witnesses count (TPS/totalTransactionCount skipped, not exposed by public API cheaply)
 - [ ] Super Representative (witness) list with votes and productivity
 - [ ] Last-N transactions for an address (TRX + TRC-20) via TronGrid v1
 - [ ] Export last-N transactions to CSV
 - [ ] Staking rewards estimator — input stake amount, show daily/weekly/monthly TRX
 - [ ] Energy/bandwidth cost estimator for a TRC-20 transfer
-- [ ] QR code of a TRX address with optional amount (tron: URI)
+- [x] QR code of a TRX address with optional amount (tron: URI)
 - [ ] Watch-only wallet — add a label + address, show aggregate TRX+USDT
 - [ ] Mnemonic → Tron address derivation (BIP39 + BIP44 path m/44'/195'/0'/0/0)
 - [ ] Theme toggle (dark/light) persisted in localStorage

@@ -32,8 +32,15 @@ main { padding: 12px 16px 80px; max-width: 720px; margin: 0 auto; }
 .panel h2 { margin: 0 0 6px; font-size: 20px; }
 .hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
 
-input[type=text] { width: 100%; background: var(--card2); color: var(--fg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 16px; margin-bottom: 10px; outline: none; }
-input[type=text]:focus { border-color: var(--accent2); }
+input[type=text], input[type=number], textarea { width: 100%; background: var(--card2); color: var(--fg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 16px; margin-bottom: 10px; outline: none; font-family: inherit; }
+input[type=text]:focus, input[type=number]:focus, textarea:focus { border-color: var(--accent2); }
+textarea { resize: vertical; }
+
+.tbl { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+.tbl th, .tbl td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); word-break: break-all; }
+.tbl th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+#qCanvas { display: block; margin: 10px 0; border-radius: 8px; max-width: 100%; }
 
 button { font: inherit; }
 .primary { width: 100%; background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 44px; }

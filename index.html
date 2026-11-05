@@ -6,6 +6,7 @@
 <title>Tron Tools — Osaka Research</title>
 <link rel="stylesheet" href="style.css" />
 <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.2/dist/TronWeb.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
 <header class="hdr">
@@ -19,6 +20,11 @@
   <button class="tab" data-tab="balance">Balance</button>
   <button class="tab" data-tab="tx">Tx Lookup</button>
   <button class="tab" data-tab="resources">Resources</button>
+  <button class="tab" data-tab="convert">TRX/USD</button>
+  <button class="tab" data-tab="multibalance">Multi-Balance</button>
+  <button class="tab" data-tab="trc20">TRC-20 Info</button>
+  <button class="tab" data-tab="netstats">Network Stats</button>
+  <button class="tab" data-tab="qr">QR Address</button>
 </nav>
 
 <main>
@@ -69,6 +75,50 @@
     <input id="rAddr" type="text" placeholder="TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false" />
     <button id="rBtn" class="primary">Fetch resources</button>
     <div id="rOut" class="out"></div>
+  </section>
+
+  <section id="convert" class="panel">
+    <h2>TRX / USD Converter</h2>
+    <p class="hint">Live TRX price via CoinGecko. Manual refresh.</p>
+    <button id="cRefreshBtn" class="primary">Refresh price</button>
+    <div id="cPrice" class="out"></div>
+    <label>TRX amount</label>
+    <input id="cTrx" type="number" placeholder="0.0" />
+    <label>USD amount</label>
+    <input id="cUsd" type="number" placeholder="0.0" />
+  </section>
+
+  <section id="multibalance" class="panel">
+    <h2>Multi-Address Balance Checker</h2>
+    <p class="hint">Paste one address per line. Shows TRX + USDT for each.</p>
+    <textarea id="mAddrs" rows="6" placeholder="TXYZ...&#10;TXYZ...&#10;TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
+    <button id="mBtn" class="primary">Fetch all</button>
+    <div id="mOut" class="out"></div>
+  </section>
+
+  <section id="trc20" class="panel">
+    <h2>Generic TRC-20 Token Info</h2>
+    <p class="hint">Paste a TRC-20 contract address, optionally an owner address for balance.</p>
+    <input id="trcContract" type="text" placeholder="contract address TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <input id="trcOwner" type="text" placeholder="owner address (optional)" autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <button id="trcBtn" class="primary">Fetch token info</button>
+    <div id="trcOut" class="out"></div>
+  </section>
+
+  <section id="netstats" class="panel">
+    <h2>Network Stats</h2>
+    <p class="hint">Current block height, witness count, and chain parameters.</p>
+    <button id="nBtn" class="primary">Fetch stats</button>
+    <div id="nOut" class="out"></div>
+  </section>
+
+  <section id="qr" class="panel">
+    <h2>QR Code for Address</h2>
+    <p class="hint">Generate a scannable QR for any Tron address, with optional TRX amount.</p>
+    <input id="qAddr" type="text" placeholder="TXYZ..." autocapitalize="off" autocomplete="off" spellcheck="false" />
+    <input id="qAmt" type="number" placeholder="amount (optional)" />
+    <button id="qBtn" class="primary">Generate QR</button>
+    <div id="qOut" class="out"></div>
   </section>
 </main>
 

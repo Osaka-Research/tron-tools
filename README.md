@@ -9,6 +9,11 @@ A set of client-side utilities for the Tron mainnet. No server, no tracking — 
 - **Balance** — live TRX and USDT (TRC-20) balance for any address
 - **Tx Lookup** — view type, status, from/to, amount, fee, and block for a tx hash
 - **Resources** — bandwidth, energy, frozen stake, and TRX balance for an account
+- **TRX/USD** — live TRX price via CoinGecko, two-way converter
+- **Multi-Balance** — paste N addresses, get TRX + USDT for each in a table
+- **TRC-20 Info** — paste any TRC-20 contract, see name/symbol/decimals, optional owner balance
+- **Network Stats** — current block height, block time, witness count
+- **QR Address** — scannable QR for any address, optional `tron:` amount
 
 ## Run locally
 
